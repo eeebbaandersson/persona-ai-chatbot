@@ -1,27 +1,219 @@
+
 <!DOCTYPE html>
 <html lang="sv" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot</title>
+    <title>AI Chat </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Här kan du senare länka in CSS -->
     <style>
-        /* Din CSS hamnar här */
+        :root {
+            /* Den extremt mörka basen från dina bilder */
+            --bg-black: #020204;
+            /* Den isiga cyan-tonen för glöden */
+            --accent-cyan: rgba(56, 189, 248, 0.15);
+            --text-white: #ffffff;
+            --text-gray: rgba(255, 255, 255, 0.45);
+            --glass-bg: rgba(255, 255, 255, 0.015);
+            --glass-border: rgba(255, 255, 255, 0.07);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            /* En mörk marinblå bas istället för helt svart gör att gradienter syns bättre */
+            background-color: #05070a;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+
+            /* En kombination av linjärt svep och en "spotlight" */
+            background-image:
+                /* 1. Ett diagonalt svep som sätter färgtonen på hela sidan */
+                    linear-gradient(
+                            135deg,
+                            rgba(56, 189, 248, 0.12) 0%,   /* Cyan i övre vänstra hörnet */
+                            rgba(15, 23, 42, 0) 50%        /* Tonar ut till mörkt i mitten */
+                    ),
+                        /* 2. En stor, mjuk horisontell glöd i toppen */
+                    radial-gradient(
+                            ellipse 100% 80% at 50% -20%,
+                            rgba(56, 189, 248, 0.18) 0%,   /* Starkare ljus i toppen */
+                            transparent 100%
+                    );
+
+            background-attachment: fixed;
+        }
+
+        .layout-container {
+            width: 100%;
+            max-width: 1300px;
+            padding: 0 60px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 100px;
+            align-items: center;
+        }
+
+        .hero-text {
+            font-size: clamp(3.5rem, 6vw, 5.5rem);
+            line-height: 0.95; /* Den tajta radhöjden från bild 1 */
+            font-weight: 600;
+            letter-spacing: -0.05em;
+            margin: 0 0 24px 0;
+            /* Subtil vertikal toning på texten */
+            background: linear-gradient(to bottom, #ffffff 70%, rgba(255,255,255,0.6));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sub-text {
+            color: var(--text-gray);
+            font-size: 1.15rem;
+            max-width: 410px;
+            line-height: 1.5;
+            margin-bottom: 40px;
+            letter-spacing: -0.01em;
+        }
+
+        /* Chatt-fönstret */
+        .chat-window {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            height: 650px;
+            backdrop-filter: blur(40px); /* Mer blur för en premium-känsla */
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+
+            position: relative;
+        }
+
+        /* En extremt tunn topp-kant (reflex) för att definiera formen */
+        .chat-window::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        }
+
+        #messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-bottom: 20px;
+        }
+
+        #messages::-webkit-scrollbar { width: 4px; }
+        #messages::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+
+        /* Input-fältet baserat på bild 1 */
+        .input-wrapper {
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            padding: 10px 12px 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: rgba(56, 189, 248, 0.3);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        #userInput {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        #userInput::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Den runda knappen med pilen */
+        .send-btn {
+            background: #ffffff;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #000;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+            background: #f0f0f0;
+        }
+
+        @media (max-width: 1024px) {
+            .layout-container {
+                grid-template-columns: 1fr;
+                padding: 80px 24px;
+                text-align: center;
+            }
+            .hero-text { font-size: 3.8rem; }
+            .sub-text { margin: 0 auto 40px; }
+            .chat-window { height: 500px; }
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <h1 th:text="${'Hello from the AI Chat!'}">HEADER</h1>
-</header>
+<div class="layout-container">
+    <section class="hero-section">
+        <h1 class="hero-text">
+            AI<br>
+            CHATBOT
+        </h1>
+        <p class="sub-text">
+            Future placeholder tagline...
+        </p>
+    </section>
 
-<main>
+    <main class="chat-window">
+        <div id="messages">
+            <!-- Här hamnar din historik -->
+        </div>
 
-</main>
+        <div class="input-wrapper">
+            <input type="text" id="userInput" placeholder="Ask me anything...">
+            <button class="send-btn" onclick="sendMessage()">↑</button>
+        </div>
+    </main>
+</div>
 
 <script>
-</script>
+    function sendMessage() {
+        const input = document.getElementById('userInput');
+        if (!input.value.trim()) return;
 
+        const messages = document.getElementById('messages');
+        const userMsg = document.createElement('div');
+        userMsg.style.cssText = "margin-bottom: 20px; text-align: right; color: rgba(255,255,255,0.9); font-size: 0.95rem;";
+        userMsg.textContent = input.value;
+        messages.appendChild(userMsg);
+
+        input.value = '';
+        messages.scrollTop = messages.scrollHeight;
+    }
+</script>
 </body>
 </html>
