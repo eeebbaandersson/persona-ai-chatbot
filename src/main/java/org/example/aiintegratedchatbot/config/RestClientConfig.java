@@ -11,6 +11,8 @@ public class RestClientConfig {
     @Value("${ai.api.base-url}")
     private String baseUrl;
 
+
+
     @Bean
     public RestClient restClient() {
         return RestClient.builder()

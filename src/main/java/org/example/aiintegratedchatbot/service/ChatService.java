@@ -29,7 +29,7 @@ public class ChatService {
         List<ChatMessage> history = chatHistoryRepository.getMessages(request.sessionId());
 
         if (history.isEmpty()){
-            String systemPrompt = getSystemPrompt(request.personality());
+            String systemPrompt = request.personality().getSystemPrompt();
             history.add(new ChatMessage("system", systemPrompt));
         }
 
@@ -52,19 +52,4 @@ public class ChatService {
 
         return new ChatResponseDTO(aiMessage, request.sessionId());
     }
-
-    private String getSystemPrompt(String personality){
-        return switch (personality.toLowerCase()) {
-            case "code-helper" ->
-                    "You are a helpful code assistant.Be patient and explain in easy steps.";
-            case "mood-booster" ->
-                "You are an empathetic mentor. Your goal is to fight imposter syndrome. " +
-                        "Remind the user that everyone struggles, use encouraging words and " +
-                        "occasionally include a short motivational quote about learning.";
-
-            default -> "You are a helpful assistant.";
-        };
-    }
-
-
 }
