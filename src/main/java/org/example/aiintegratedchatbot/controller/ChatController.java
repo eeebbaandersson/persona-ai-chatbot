@@ -17,7 +17,7 @@ public class ChatController {
     public ChatController(ChatService chatService) {
         this.chatService = chatService;
     }
-    
+
     @PostMapping("/chat")
     public ChatResponseDTO chat(@RequestBody ChatRequestDTO request) {
         log.info("Request received! Personality: "  + request.personality() + " Message: " + request.message() + " SessionId: " + request.sessionId());
