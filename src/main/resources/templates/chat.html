@@ -37,7 +37,7 @@
 
         <div class="input-wrapper">
             <input type="text" id="userInput" placeholder="What's on your mind today?">
-            <button class="send-btn" onclick="sendMessage()">↑</button>
+            <button type="button" class="send-btn" onclick="sendMessage()">↑</button>
         </div>
     </main>
 </div>
@@ -117,8 +117,11 @@
        });
    }
 
-   document.getElementById('userInput').addEventListener('keypress', function (e) {
-       if (e.key === 'Enter') sendMessage();
+   document.getElementById('userInput').addEventListener('keydown', function (e) {
+       if (e.key === 'Enter'){
+           e.preventDefault();
+           sendMessage();
+       }
    });
 
 </script>

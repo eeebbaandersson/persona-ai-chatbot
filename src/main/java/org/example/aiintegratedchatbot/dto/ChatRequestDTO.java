@@ -1,6 +1,6 @@
 package org.example.aiintegratedchatbot.dto;
 
-import org.example.aiintegratedchatbot.ChatPersonality;
+import org.example.aiintegratedchatbot.model.ChatPersonality;
 
 public record ChatRequestDTO(
         ChatPersonality personality,

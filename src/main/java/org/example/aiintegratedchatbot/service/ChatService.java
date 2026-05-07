@@ -1,6 +1,6 @@
 package org.example.aiintegratedchatbot.service;
 
-import org.example.aiintegratedchatbot.ChatPersonality;
+import org.example.aiintegratedchatbot.model.ChatPersonality;
 import org.example.aiintegratedchatbot.dto.ChatCompletionRequest;
 import org.example.aiintegratedchatbot.dto.ChatCompletionResponse;
 import org.example.aiintegratedchatbot.dto.ChatRequestDTO;
