@@ -18,20 +18,12 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-//    @GetMapping("/test-ai")
-//    public ChatResponseDTO testAi() {
-//        ChatRequestDTO testRequest = new ChatRequestDTO(
-//                "mood-booster",
-//                "Tell me something uplifting",
-//                "test-session-123"
-//        );
-//        return chatService.handleChat(testRequest);
-//
-//    }
-
     @PostMapping("/chat")
     public ChatResponseDTO chat(@RequestBody ChatRequestDTO request) {
-        log.info("Request received! Message: " + request.message());
+        log.info("Chat request received. personality={}, sessionId={}, messageLength={}",
+                request.personality(), request.sessionId(),
+                request.message() == null ? 0 : request.message().length());
+        log.debug("Chat request body: {}", request.message());
        return chatService.handleChat(request);
     }
 }

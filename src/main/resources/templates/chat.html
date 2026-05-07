@@ -3,25 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot</title>
+    <title>AI Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/style.css" th:href="@{/css/style.css}">
 
-    <!-- Här kan du senare länka in CSS -->
-    <style>
-        /* Din CSS hamnar här */
-    </style>
+
 </head>
 <body>
 
-<header>
-    <h1 th:text="${'Hello from the AI Chat!'}">HEADER</h1>
-</header>
+<div class="app-container">
 
-<main>
+    <section class="hero-section">
+        <h1 class="hero-text">
+            Mind-Code<br>Assistant
+        </h1>
+        <p class="sub-text">
+            Your empathetic coding partner. Switch between tactical help and emotional support to keep your flow.
+        </p>
 
-</main>
+        <div class="personality-container">
+            <button class="personality-btn" data-id="CODE_HELPER">Code-Helper</button>
+            <button class="personality-btn active" data-id="DEFAULT">Assistant</button>
+            <button class="personality-btn" data-id="MOOD_BOOSTER">Mood-Booster</button>
+        </div>
+
+    </section>
+
+    <main class="chat-window">
+
+        <div id="messages">
+            <!-- Messages-->
+        </div>
+
+        <div class="input-wrapper">
+
+            <input type="text" id="userInput" aria-label="Chat message"
+                   placeholder="What's on your mind today?">
+            <button type="button" class="send-btn" aria-label="Send message"
+                    onclick="sendMessage()">↑</button>
+        </div>
+    </main>
+</div>
 
 <script>
-</script>
+   let currentPersonality = 'DEFAULT';
+   let sessionId = 'session-' + Math.random().toString(36).substring(2,9);
 
+   function generateSessionId() {
+       return 'session-' + Math.random().toString(36).substring(2,9);
+   }
+
+   // Handle personality choice
+   document.querySelectorAll('.personality-btn').forEach(btn => {
+       btn.addEventListener('click', () => {
+           document.querySelector('.personality-btn.active').classList.remove('active');
+           btn.classList.add('active');
+           currentPersonality = btn.getAttribute('data-id');
+
+           // New personality = new session
+           sessionId = generateSessionId();
+           document.getElementById('messages').innerHTML = '';
+
+           const separator = document.createElement('div');
+           separator.className = 'message ai';
+           separator.textContent = '- New conversation started -';
+           document.getElementById('messages').appendChild(separator);
+       });
+   });
+
+   async function sendMessage() {
+       const input = document.getElementById('userInput');
+       const messageText = input.value.trim();
+
+       if (!messageText) return;
+
+       appendMessage(messageText, 'user');
+       input.value = '';
+
+       try {
+           const response = await fetch('/api/v1/chat', {
+               method: 'POST',
+               headers: {'Content-Type': 'application/json'},
+               body: JSON.stringify({
+                   personality: currentPersonality,
+                   message: messageText,
+                   sessionId: sessionId
+               })
+           });
+
+          if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+          appendMessage(data.response ?? "(empty response)", 'ai');
+
+       } catch (error) {
+           console.error("Error:", error);
+           appendMessage("An error occurred during communication with the server.", 'ai');
+       }
+   }
+
+   function appendMessage(text, sender) {
+       const messages = document.getElementById('messages');
+       const msgDiv = document.createElement('div');
+
+       msgDiv.classList.add('message');
+       msgDiv.classList.add(sender === 'user' ? 'user' : 'ai');
+
+       msgDiv.textContent = text;
+       messages.appendChild(msgDiv);
+
+       messages.scrollTo({
+           top: messages.scrollHeight,
+           behavior: 'smooth'
+       });
+   }
+
+   document.getElementById('userInput').addEventListener('keydown', function (e) {
+       if (e.key === 'Enter'){
+           e.preventDefault();
+           sendMessage();
+       }
+   });
+
+</script>
 </body>
 </html>

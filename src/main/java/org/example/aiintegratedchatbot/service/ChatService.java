@@ -1,5 +1,6 @@
 package org.example.aiintegratedchatbot.service;
 
+import org.example.aiintegratedchatbot.model.ChatPersonality;
 import org.example.aiintegratedchatbot.dto.ChatCompletionRequest;
 import org.example.aiintegratedchatbot.dto.ChatCompletionResponse;
 import org.example.aiintegratedchatbot.dto.ChatRequestDTO;
@@ -29,8 +30,10 @@ public class ChatService {
         List<ChatMessage> history = chatHistoryRepository.getMessages(request.sessionId());
 
         if (history.isEmpty()){
-            String systemPrompt = getSystemPrompt(request.personality());
-            history.add(new ChatMessage("system", systemPrompt));
+            ChatPersonality personality = request.personality() != null
+                    ? request.personality()
+                    : ChatPersonality.DEFAULT;
+            history.add(new ChatMessage("system", personality.getSystemPrompt()));
         }
 
         history.add(new ChatMessage("user", request.message()));
@@ -52,19 +55,4 @@ public class ChatService {
 
         return new ChatResponseDTO(aiMessage, request.sessionId());
     }
-
-    private String getSystemPrompt(String personality){
-        return switch (personality.toLowerCase()) {
-            case "code-helper" ->
-                    "You are a helpful code assistant.Be patient and explain in easy steps.";
-            case "mood-booster" ->
-                "You are an empathetic mentor. Your goal is to fight imposter syndrome. " +
-                        "Remind the user that everyone struggles, use encouraging words and " +
-                        "occasionally include a short motivational quote about learning.";
-
-            default -> "You are a helpful assistant.";
-        };
-    }
-
-
 }

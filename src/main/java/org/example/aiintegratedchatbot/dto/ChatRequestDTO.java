@@ -1,7 +1,9 @@
 package org.example.aiintegratedchatbot.dto;
 
+import org.example.aiintegratedchatbot.model.ChatPersonality;
+
 public record ChatRequestDTO(
-        String personality,
+        ChatPersonality personality,
         String message,
         String sessionId
 ) {
