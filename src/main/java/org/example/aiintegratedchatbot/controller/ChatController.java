@@ -20,7 +20,10 @@ public class ChatController {
 
     @PostMapping("/chat")
     public ChatResponseDTO chat(@RequestBody ChatRequestDTO request) {
-        log.info("Request received! Personality: "  + request.personality() + " Message: " + request.message() + " SessionId: " + request.sessionId());
+        log.info("Chat request received. personality={}, sessionId{}, messageLenght={}",
+                request.personality(), request.sessionId(),
+                request.message() == null ? 0 : request.message().length());
+        log.debug("Chat request body: {}", request.message());
        return chatService.handleChat(request);
     }
 }

@@ -1,5 +1,6 @@
 package org.example.aiintegratedchatbot.service;
 
+import org.example.aiintegratedchatbot.ChatPersonality;
 import org.example.aiintegratedchatbot.dto.ChatCompletionRequest;
 import org.example.aiintegratedchatbot.dto.ChatCompletionResponse;
 import org.example.aiintegratedchatbot.dto.ChatRequestDTO;
@@ -29,8 +30,10 @@ public class ChatService {
         List<ChatMessage> history = chatHistoryRepository.getMessages(request.sessionId());
 
         if (history.isEmpty()){
-            String systemPrompt = request.personality().getSystemPrompt();
-            history.add(new ChatMessage("system", systemPrompt));
+            ChatPersonality personality = request.personality() != null
+                    ? request.personality()
+                    : ChatPersonality.DEFAULT;
+            history.add(new ChatMessage("system", personality.getSystemPrompt()));
         }
 
         history.add(new ChatMessage("user", request.message()));
