@@ -20,4 +20,6 @@ public class ChatHistoryRepository {
     public void addMessage(String sessionId, ChatMessage chatMessage) {
         getMessages(sessionId).add(chatMessage);
     }
+
+    // Addera equals & hashcode?
 }

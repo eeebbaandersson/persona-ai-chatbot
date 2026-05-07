@@ -12,7 +12,6 @@ public class RestClientConfig {
     private String baseUrl;
 
 
-
     @Bean
     public RestClient restClient() {
         return RestClient.builder()
