@@ -21,5 +21,4 @@ public class ChatHistoryRepository {
         getMessages(sessionId).add(chatMessage);
     }
 
-    // Addera equals & hashcode?
 }
