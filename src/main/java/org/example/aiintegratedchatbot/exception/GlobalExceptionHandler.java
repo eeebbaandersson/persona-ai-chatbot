@@ -1,6 +1,7 @@
 package org.example.aiintegratedchatbot.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,6 +13,20 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // 400
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponseDTO handleValidationException(MethodArgumentNotValidException ex) {
+       String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+
+       return new ErrorResponseDTO(
+               LocalDateTime.now(),
+               HttpStatus.BAD_REQUEST.value(),
+               "VALIDATION_ERROR",
+               errorMessage
+       );
+    }
 
     // 408
     @ExceptionHandler(ResourceAccessException.class)
@@ -64,7 +79,7 @@ public class GlobalExceptionHandler {
     // 503
     @ExceptionHandler(AIServiceException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    public ErrorResponseDTO handleAIError(RuntimeException ex) {
+    public ErrorResponseDTO handleAIError(AIServiceException ex) {
         return new ErrorResponseDTO(
                 LocalDateTime.now(),
                 HttpStatus.SERVICE_UNAVAILABLE.value(),
