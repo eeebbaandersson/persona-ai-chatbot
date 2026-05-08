@@ -42,13 +42,6 @@ public class ChatService {
 
         ChatCompletionResponse aiResponse = aiClientService.getCompletion(aiRequest);
 
-        if (aiResponse == null || aiResponse.choices() == null || aiResponse.choices().isEmpty()) {
-            return new ChatResponseDTO(
-                    "Kunde inte ansluta till AI-tjänsten. Kontrollera att LM Studio körs på port 1234.",
-                    request.sessionId()
-            );
-        }
-
         String aiMessage = aiResponse.choices().get(0).message().content();
 
         history.add(new ChatMessage("assistant", aiMessage));

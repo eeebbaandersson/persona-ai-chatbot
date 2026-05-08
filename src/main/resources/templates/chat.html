@@ -92,15 +92,16 @@
            });
 
           if (!response.ok) {
-              throw new Error(`HTTP ${response.status}`);
+             const errorData = await response.json();
+             throw new Error(errorData.message || `Error ${response.status}`);
           }
 
           const data = await response.json();
           appendMessage(data.response ?? "(empty response)", 'ai');
 
        } catch (error) {
-           console.error("Error:", error);
-           appendMessage("An error occurred during communication with the server.", 'ai');
+           console.error("Error details:", error);
+           appendMessage(error.message, 'ai');
        }
    }
 
