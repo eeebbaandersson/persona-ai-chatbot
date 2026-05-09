@@ -1,5 +1,6 @@
 package org.example.aiintegratedchatbot.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.example.aiintegratedchatbot.dto.ChatRequestDTO;
 import org.example.aiintegratedchatbot.dto.ChatResponseDTO;
@@ -19,11 +20,11 @@ public class ChatController {
     }
 
     @PostMapping("/chat")
-    public ChatResponseDTO chat(@RequestBody ChatRequestDTO request) {
-        log.info("Chat request received. personality={}, sessionId={}, messageLength={}",
-                request.personality(), request.sessionId(),
+    public ChatResponseDTO chat(@Valid @RequestBody ChatRequestDTO request) {
+        log.info("Chat request received. personality={}, messageLength={}",
+                request.personality(),
                 request.message() == null ? 0 : request.message().length());
-        log.debug("Chat request body: {}", request.message());
+        log.debug("Chat request metadata captured");
        return chatService.handleChat(request);
     }
 }
