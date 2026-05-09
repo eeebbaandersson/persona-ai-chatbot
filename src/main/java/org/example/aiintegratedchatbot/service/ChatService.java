@@ -33,18 +33,17 @@ public class ChatService {
             ChatPersonality personality = request.personality() != null
                     ? request.personality()
                     : ChatPersonality.DEFAULT;
-            history.add(new ChatMessage("system", personality.getSystemPrompt()));
+            chatHistoryRepository.addMessage(request.sessionId(), new ChatMessage("system", personality.getSystemPrompt()));
         }
 
-        history.add(new ChatMessage("user", request.message()));
+        chatHistoryRepository.addMessage(request.sessionId(), new ChatMessage("user", request.message()) );
 
         ChatCompletionRequest aiRequest = new ChatCompletionRequest(modelName, history);
-
         ChatCompletionResponse aiResponse = aiClientService.getCompletion(aiRequest);
 
-        String aiMessage = aiResponse.choices().get(0).message().content();
+        String aiMessage = aiResponse.choices().getFirst().message().content();
 
-        history.add(new ChatMessage("assistant", aiMessage));
+        chatHistoryRepository.addMessage(request.sessionId(), new ChatMessage("assistant", aiMessage));
 
         return new ChatResponseDTO(aiMessage, request.sessionId());
     }
