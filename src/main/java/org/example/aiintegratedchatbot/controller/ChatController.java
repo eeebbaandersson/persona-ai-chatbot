@@ -21,10 +21,10 @@ public class ChatController {
 
     @PostMapping("/chat")
     public ChatResponseDTO chat(@Valid @RequestBody ChatRequestDTO request) {
-        log.info("Chat request received. personality={}, sessionId={}, messageLength={}",
-                request.personality(), request.sessionId(),
+        log.info("Chat request received. personality={}, messageLength={}",
+                request.personality(),
                 request.message() == null ? 0 : request.message().length());
-        log.debug("Chat request body: {}", request.message());
+        log.debug("Chat request metadata captured");
        return chatService.handleChat(request);
     }
 }

@@ -18,7 +18,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponseDTO handleValidationException(MethodArgumentNotValidException ex) {
-       String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+       String errorMessage = ex.getBindingResult().getFieldError() != null
+               ? ex.getBindingResult().getFieldError().getDefaultMessage()
+               : "Validation failed";
 
        return new ErrorResponseDTO(
                LocalDateTime.now(),

@@ -42,6 +42,7 @@ public class AIClientService {
         } catch (HttpClientErrorException.TooManyRequests |
                  HttpServerErrorException.BadGateway |
                  HttpServerErrorException.GatewayTimeout |
+                 RetryableHttpException |
                  ResourceAccessException ex) {
             throw ex;
         } catch (Exception e) {
