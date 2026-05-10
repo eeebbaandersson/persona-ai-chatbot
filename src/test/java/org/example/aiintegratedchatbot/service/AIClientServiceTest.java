@@ -1,11 +1,12 @@
-package org.example.aiintegratedchatbot;
+package org.example.aiintegratedchatbot.service;
 
 
+import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import org.example.aiintegratedchatbot.dto.ChatCompletionRequest;
 import org.example.aiintegratedchatbot.dto.ChatCompletionResponse;
 import org.example.aiintegratedchatbot.exception.AIServiceException;
-import org.example.aiintegratedchatbot.service.AIClientService;
+import org.example.aiintegratedchatbot.exception.RetryableHttpException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -94,5 +95,49 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
         verify(1, postRequestedFor(urlEqualTo(fullPath)));
 
+    }
+
+    @Test
+    void getCompletion_ShouldReturnAIServiceException_On429TooManyRequests() {
+        String fullPath = "/v1/chat/completions";
+
+        stubFor(post(urlEqualTo(fullPath))
+                .willReturn(aResponse().withStatus(429)));
+
+        ChatCompletionRequest request = new ChatCompletionRequest("test-model", List.of());
+
+        assertThatThrownBy(() -> aiClientService.getCompletion(request))
+                .isInstanceOf(AIServiceException.class);
+
+        verify(3, postRequestedFor(urlEqualTo(fullPath)));
+    }
+
+    @Test
+    void getCompletion_ShouldReturnAIServiceException_OnMalformedJson() {
+        String fullPath = "/v1/chat/completions";
+
+        stubFor(post(urlEqualTo(fullPath))
+                .willReturn(ok().withBody("{ \"choices\": [ { \"message\": \"invalid\" ] }")));
+
+        ChatCompletionRequest request = new ChatCompletionRequest("test-model", List.of());
+
+        assertThatThrownBy(() -> aiClientService.getCompletion(request))
+                .isInstanceOf(AIServiceException.class)
+                .hasMessageContaining("AI service is currently unavailable");
+    }
+
+    @Test
+    void getCompletion_ShouldReturnAIServiceException_OnNetworkFault() {
+        String fullPath = "/v1/chat/completions";
+
+        stubFor(post(urlEqualTo(fullPath))
+                .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
+
+        ChatCompletionRequest request = new ChatCompletionRequest("test-model", List.of());
+
+        assertThatThrownBy(() -> aiClientService.getCompletion(request))
+        .isInstanceOf(AIServiceException.class);
+
+        verify(3, postRequestedFor(urlEqualTo(fullPath)));
     }
 }
