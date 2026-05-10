@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat</title>
+    <title>Mind Code Assistant</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/style.css" th:href="@{/css/style.css}">
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 
 
 </head>
@@ -109,7 +111,7 @@
 
        } catch (error) {
            console.error("Error details:", error);
-           appendMessage(error.message, 'ai');
+           appendMessage(error.message, 'error');
        }
    }
 
@@ -118,9 +120,19 @@
        const msgDiv = document.createElement('div');
 
        msgDiv.classList.add('message');
-       msgDiv.classList.add(sender === 'user' ? 'user' : 'ai');
 
-       msgDiv.textContent = text;
+       if (sender === 'user') {
+           msgDiv.classList.add('user');
+           msgDiv.textContent = text;
+       } else if (sender === 'error') {
+           msgDiv.classList.add('error');
+           msgDiv.textContent = '⚠️ ' + text;
+       } else {
+           msgDiv.classList.add('ai');
+           const cleanText = text.replace(/(\*\*.*?\*\*):?\s*/g, '$1 ');
+           msgDiv.innerHTML = marked.parse(cleanText);
+       }
+
        messages.appendChild(msgDiv);
 
        messages.scrollTo({
