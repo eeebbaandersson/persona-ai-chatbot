@@ -37,9 +37,6 @@ public class AIClientService {
                         throw new RetryableHttpException("AI service is busy or unavailable, retrying...");
                     })
                     .body(ChatCompletionResponse.class);
-
-
-
     }
 
     public ChatCompletionResponse aiFallback(ChatCompletionRequest request, Exception e) {
