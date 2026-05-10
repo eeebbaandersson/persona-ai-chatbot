@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat</title>
+    <title>Mind Code Assistant</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/style.css" th:href="@{/css/style.css}">
 
+    <script src="https://cdn.jsdelivr.net/npm/marked@18.0.3/lib/marked.umd.js" integrity="sha384-[HASH]" crossorigin="anonymous"></script>
 
 </head>
 <body>
@@ -109,7 +110,7 @@
 
        } catch (error) {
            console.error("Error details:", error);
-           appendMessage(error.message, 'ai');
+           appendMessage(error.message, 'error');
        }
    }
 
@@ -118,9 +119,23 @@
        const msgDiv = document.createElement('div');
 
        msgDiv.classList.add('message');
-       msgDiv.classList.add(sender === 'user' ? 'user' : 'ai');
 
-       msgDiv.textContent = text;
+       if (sender === 'user') {
+           msgDiv.classList.add('user');
+           msgDiv.textContent = text;
+       } else if (sender === 'error') {
+           msgDiv.classList.add('error');
+           msgDiv.textContent = '⚠️ ' + text;
+       } else {
+           msgDiv.classList.add('ai');
+           const cleanText = text.replace(/(\*\*.*?\*\*):?\s*/g, '$1 ');
+           if (typeof marked !== 'undefined' && marked.parse) {
+               msgDiv.innerHTML = marked.parse(cleanText);
+           } else {
+               msgDiv.textContent = cleanText;
+           }
+       }
+
        messages.appendChild(msgDiv);
 
        messages.scrollTo({
