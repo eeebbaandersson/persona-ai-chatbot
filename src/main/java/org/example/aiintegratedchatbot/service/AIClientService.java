@@ -47,6 +47,6 @@ public class AIClientService {
             if (e.getMessage() != null && e.getMessage().contains("Connection refused")) {
                 message = "Could not connect to the AI service. Make sure LM Studio is using port 1234.";
             }
-            throw  new AIServiceException(message, e);
+            throw new AIServiceException(message, e);
     }
 }
