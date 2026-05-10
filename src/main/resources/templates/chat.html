@@ -7,8 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/style.css" th:href="@{/css/style.css}">
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/marked@18.0.3/lib/marked.umd.js" integrity="sha384-[HASH]" crossorigin="anonymous"></script>
 
 </head>
 <body>
@@ -130,7 +129,11 @@
        } else {
            msgDiv.classList.add('ai');
            const cleanText = text.replace(/(\*\*.*?\*\*):?\s*/g, '$1 ');
-           msgDiv.innerHTML = marked.parse(cleanText);
+           if (typeof marked !== 'undefined' && marked.parse) {
+               msgDiv.innerHTML = marked.parse(cleanText);
+           } else {
+               msgDiv.textContent = cleanText;
+           }
        }
 
        messages.appendChild(msgDiv);
