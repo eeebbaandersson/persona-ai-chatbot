@@ -29,7 +29,6 @@ public class AIClientService {
     public ChatCompletionResponse getCompletion(ChatCompletionRequest request) {
         log.info("Skickar anrop till AI-modell: {}", request.model());
 
-        try {
             return restClient.post()
                     .uri("/chat/completions")
                     .body(request)
@@ -38,25 +37,16 @@ public class AIClientService {
                         throw new RetryableHttpException("AI service is busy or unavailable, retrying...");
                     })
                     .body(ChatCompletionResponse.class);
-
-        } catch (HttpClientErrorException.TooManyRequests |
-                 HttpServerErrorException.BadGateway |
-                 HttpServerErrorException.GatewayTimeout |
-                 RetryableHttpException |
-                 ResourceAccessException ex) {
-            throw ex;
-        } catch (Exception e) {
-            log.error("Unexpected error during AI-communication", e);
-            throw new AIServiceException("Could not connect to the AI-service. Make sure LM Studio is using port 1234.", e);
-        }
-
     }
 
     public ChatCompletionResponse aiFallback(ChatCompletionRequest request, Exception e) {
-        if (e instanceof RetryableHttpException) {
-            log.error("AI service failed for model: {}", request.model());
-        }
-        throw new AIServiceException("AI service is currently unavailable after multiple attempts.",e);
+            log.error("AI service failed. Model: {}, Reason {}", request.model(), e.getMessage());
 
+            String message = "AI service is currently unavailable after multiple attempts.";
+
+            if (e.getMessage() != null && e.getMessage().contains("Connection refused")) {
+                message = "Could not connect to the AI service. Make sure LM Studio is using port 1234.";
+            }
+            throw new AIServiceException(message, e);
     }
 }
