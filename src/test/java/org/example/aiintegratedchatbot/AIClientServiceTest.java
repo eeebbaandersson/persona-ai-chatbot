@@ -4,6 +4,7 @@ package org.example.aiintegratedchatbot;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import org.example.aiintegratedchatbot.dto.ChatCompletionRequest;
 import org.example.aiintegratedchatbot.dto.ChatCompletionResponse;
+import org.example.aiintegratedchatbot.exception.AIServiceException;
 import org.example.aiintegratedchatbot.service.AIClientService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(properties = {"ai.api.base-url=${wiremock.server.baseUrl}/v1"})
 @EnableWireMock
@@ -53,6 +55,44 @@ import static org.assertj.core.api.Assertions.assertThat;
         verify(3, postRequestedFor(urlEqualTo(fullPath)));
     }
 
-    
-    // testCBLogic
+
+    @Test
+    void testCircuitBreakerLogic() throws InterruptedException {
+        String fullPath = "/v1/chat/completions";
+        ChatCompletionRequest request = new ChatCompletionRequest("test-model", List.of());
+
+        stubFor(post(urlEqualTo(fullPath))
+                .willReturn(aResponse().withStatus(503)
+                        .withHeader("Content-Type", "application/json")
+                .withBody("Fail!")));
+
+        for (int i = 0; i <10; i++) {
+            try {
+                aiClientService.getCompletion(request);
+            } catch (Exception e) {
+                // Ignore exceptions in the loop, handled by CircuitBreaker
+            }
+        }
+
+        // Verify OPEN state
+        resetAllRequests();
+
+        assertThatThrownBy(() -> aiClientService.getCompletion(request))
+                .isInstanceOf(AIServiceException.class)
+                .hasMessageContaining("AI service is currently unavailable after multiple attempts.");
+
+        verify(0, postRequestedFor(urlEqualTo(fullPath)));
+
+        stubFor(post(urlEqualTo(fullPath))
+                .willReturn(okJson("{\"choices\": [{\"message\": {\"content\": \"AI-service is back again!\"}}]}")));
+
+        Thread.sleep(10001);
+
+        ChatCompletionResponse recoveryResponse = aiClientService.getCompletion(request);
+
+        assertThat(recoveryResponse.choices().getFirst().message().content()).isEqualTo("AI-service is back again!");
+
+        verify(1, postRequestedFor(urlEqualTo(fullPath)));
+
+    }
 }
