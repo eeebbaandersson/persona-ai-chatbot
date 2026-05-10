@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import org.example.aiintegratedchatbot.dto.ChatCompletionRequest;
 import org.example.aiintegratedchatbot.dto.ChatCompletionResponse;
 import org.example.aiintegratedchatbot.exception.AIServiceException;
-import org.example.aiintegratedchatbot.exception.RetryableHttpException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

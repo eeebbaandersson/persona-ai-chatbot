@@ -30,13 +30,16 @@ public class ChatService {
         List<ChatMessage> history = chatHistoryRepository.getMessages(request.sessionId());
 
         if (history.isEmpty()){
-            ChatPersonality personality = request.personality() != null
-                    ? request.personality()
-                    : ChatPersonality.DEFAULT;
-            chatHistoryRepository.addMessage(request.sessionId(), new ChatMessage("system", personality.getSystemPrompt()));
+            ChatPersonality personality = request.personality() != null ? request.personality() : ChatPersonality.DEFAULT;
+            ChatMessage systemMessage = new ChatMessage("system", personality.getSystemPrompt());
+
+            chatHistoryRepository.addMessage(request.sessionId(), systemMessage);
+            history.add(systemMessage);
         }
 
-        chatHistoryRepository.addMessage(request.sessionId(), new ChatMessage("user", request.message()) );
+        ChatMessage userMessage = new ChatMessage("user", request.message());
+        chatHistoryRepository.addMessage(request.sessionId(), userMessage);
+        history.add(userMessage);
 
         ChatCompletionRequest aiRequest = new ChatCompletionRequest(modelName, history);
         ChatCompletionResponse aiResponse = aiClientService.getCompletion(aiRequest);
