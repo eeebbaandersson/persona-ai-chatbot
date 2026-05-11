@@ -45,7 +45,7 @@ public class AIClientService {
             String message = "AI service is currently unavailable after multiple attempts.";
 
             if (e.getMessage() != null && e.getMessage().contains("Connection refused")) {
-                message = "Could not connect to the AI service. Make sure LM Studio is using port 1234.";
+                message = "Could not connect to the AI service. Make sure your AI provider (LM Studio or Cloud) is reachable at the correct port." ;
             }
             throw new AIServiceException(message, e);
     }

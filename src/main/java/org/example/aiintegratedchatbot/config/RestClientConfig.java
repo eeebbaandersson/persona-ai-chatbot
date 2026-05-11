@@ -12,7 +12,8 @@ public class RestClientConfig {
 
     @Bean
     public RestClient restClient(RestClient.Builder builder,
-                                 @Value("${ai.api.base-url}") String baseUrl) {
+                                 @Value("${ai.api.base-url}") String baseUrl,
+                                 @Value("${ai.api.key}") String apiKey) {
 
         var httpClient = HttpClients.custom()
                 .disableAutomaticRetries()
@@ -23,6 +24,7 @@ public class RestClientConfig {
         return builder
                 .requestFactory(requestFactory)
                 .baseUrl(baseUrl)
+                .defaultHeader("Authorization", "Bearer " + apiKey)
                 .build();
 
     }
