@@ -40,7 +40,7 @@
 
             <input type="text" id="userInput" aria-label="Chat message"
                    placeholder="What's on your mind today?">
-            <button type="button" class="send-btn" aria-label="Send message"
+            <button type="button" id="sendButton" class="send-btn" aria-label="Send message"
                     onclick="sendMessage()">↑</button>
         </div>
     </main>
@@ -74,12 +74,18 @@
 
    async function sendMessage() {
        const input = document.getElementById('userInput');
+       const sendBtn = document.getElementById('sendButton');
        const messageText = input.value.trim();
 
        if (!messageText) return;
 
        appendMessage(messageText, 'user');
        input.value = '';
+
+       input.disable = true;
+       if (sendBtn) sendBtn.disable = true;
+
+       showThinkingIndicator();
 
        try {
            const response = await fetch('/api/v1/chat', {
@@ -91,6 +97,8 @@
                    sessionId: sessionId
                })
            });
+
+           removeThinkingIndicator();
 
           if (!response.ok) {
             const raw = await response.text();
@@ -109,8 +117,36 @@
           appendMessage(data.response ?? "(empty response)", 'ai');
 
        } catch (error) {
+           removeThinkingIndicator();
            console.error("Error details:", error);
            appendMessage(error.message, 'error');
+       } finally {
+           input.disable = false;
+           if (sendBtn) sendBtn.disable = false;
+           input.focus();
+       }
+   }
+
+   function showThinkingIndicator() {
+       const messages = document.getElementById('messages');
+       const thinkingDiv = document.createElement('div');
+
+       thinkingDiv.id = 'thinkingIndicator';
+       thinkingDiv.className = 'message ai thinking';
+
+       thinkingDiv.innerHTML = `
+       <span class="thinking-text">Mind-Code is thinking</span>
+      <span class="dots"><span>.</span><span>.</span><span>.</span></span>
+       `;
+
+       messages.appendChild(thinkingDiv);
+       messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth'});
+   }
+
+   function removeThinkingIndicator() {
+       const indicator = document.getElementById('thinkingIndicator');
+       if (indicator) {
+           indicator.remove();
        }
    }
 
@@ -146,6 +182,11 @@
 
    document.getElementById('userInput').addEventListener('keydown', function (e) {
        if (e.key === 'Enter'){
+           if (this.disable) {
+               e.preventDefault();
+               return;
+           }
+
            e.preventDefault();
            sendMessage();
        }
