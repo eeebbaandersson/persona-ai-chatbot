@@ -82,8 +82,8 @@
        appendMessage(messageText, 'user');
        input.value = '';
 
-       input.disable = true;
-       if (sendBtn) sendBtn.disable = true;
+       input.disabled = true;
+       if (sendBtn) sendBtn.disabled = true;
 
        showThinkingIndicator();
 
@@ -121,8 +121,8 @@
            console.error("Error details:", error);
            appendMessage(error.message, 'error');
        } finally {
-           input.disable = false;
-           if (sendBtn) sendBtn.disable = false;
+           input.disabled = false;
+           if (sendBtn) sendBtn.disabled = false;
            input.focus();
        }
    }
@@ -182,7 +182,7 @@
 
    document.getElementById('userInput').addEventListener('keydown', function (e) {
        if (e.key === 'Enter'){
-           if (this.disable) {
+           if (this.disabled) {
                e.preventDefault();
                return;
            }
